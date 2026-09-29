@@ -1,9 +1,7 @@
 import argparse, os
 from src.search_engine import search_matches
-
-GREEN = "\033[0;32m"
-BLUE = "\033[0;34m"
-END = "\033[0m"
+from src.extractor import extract_source
+from src.colors import GREEN, BLUE, RED, END
 
 
 def run_cli():
@@ -15,7 +13,12 @@ def run_cli():
     if args.target:
         print(f"{BLUE}[*] Funcion: {args.target.split(":")[1]}{END}")
 
-    matches = search_matches(args.project, args.target, args.number)
+    try:
+        matches = search_matches(args.project, args.target, args.number)
+    except StopIteration:
+        path, target = args.target.split(":")
+        print(f"{RED}No existe ninguna función {target} en el archivo {path}{END}")
+        return
 
     if len(matches) == 0:
         print(f"{GREEN}No se encontró código repetitivo.{END}")
@@ -28,7 +31,15 @@ def run_cli():
         print(function)
 
         if args.verbose:
-            print("Info extra...")
+            max_lines = 15
+        if args.vv:
+            max_lines = 50
+        if args.vvv:
+            max_lines = None
+
+        if args.verbose or args.vv or args.vvv:
+            print(extract_source(function, max_lines))
+            print("------------------------------------------")
 
     
 
@@ -54,10 +65,41 @@ def func_ref(string):
 
 
 def create_parser():
-    parser = argparse.ArgumentParser(prog="drypy", description="Motor de busqueda de código repetitivo.")
-    parser.add_argument("project", type=dir_path, help="Directorio del proyecto")
-    parser.add_argument("-t", "--target", type=func_ref, help="Referencia a la función a analizar")
-    parser.add_argument("-n", "--number", help="Número de resultados", default=5)
-    parser.add_argument("-v", "--verbose", action="store_true", help="Aumenta la cantidad de información de la respuesta")
+    parser = argparse.ArgumentParser(
+        prog="drypy", 
+        description="Motor de busqueda de código Python repetitivo."
+    )
+    parser.add_argument(
+        "project", 
+        type=dir_path, 
+        help="Directorio raíz del proyecto a analizar."
+    )
+    parser.add_argument(
+        "-t", "--target"
+        , type=func_ref, 
+        help=(
+            "Función objetivo que se utilizará para la comparación. "
+            "Si no se especifica, se compararán todas las funciones entre sí."
+        )
+    )
+    parser.add_argument(
+        "-n", 
+        "--number", 
+        default=5,
+        help=(
+            "Cantidad de resultados a mostrar. "
+            "Se devolverán las N funciones más similares (por defecto: 5)."
+        )
+    )
+    parser.add_argument(
+        "-v", "--verbose", 
+        action="store_true", 
+        help=(
+            "Muestra las primeras 15 líneas del código fuente. "
+            "Usar -vv para mostrar las primeras 50 líneas y -vvv para mostrar la función completa."
+        )
+    )
+    parser.add_argument("-vv", action="store_true", help=argparse.SUPPRESS)
+    parser.add_argument("-vvv", action="store_true", help=argparse.SUPPRESS)
 
     return parser

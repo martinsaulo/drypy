@@ -1,2 +1,2 @@
 def normalize(function):
-    pass
+    return function
