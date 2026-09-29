@@ -17,7 +17,7 @@ class FunctionDefinition:
 
 
 def extract_functions(file, dir_path):
-    with open(dir_path + file) as bytes_stream:
+    with open(dir_path + file, encoding="utf-8") as bytes_stream:
         node = ast.parse(bytes_stream.read())
 
     functions = [n for n in node.body if isinstance(n, ast.FunctionDef) or isinstance(n, ast.AsyncFunctionDef)]
@@ -28,7 +28,7 @@ def extract_functions(file, dir_path):
 
 def extract_target(target):
     path, function = target.split(":")
-    with open(path) as bytes_stream:
+    with open(path, encoding="utf-8") as bytes_stream:
         node = ast.parse(bytes_stream.read())
 
     return next(filter(lambda x: x.name == function, node.body))
@@ -36,7 +36,7 @@ def extract_target(target):
 
 
 def extract_source(target, max_lines = None):
-    with open(target.dir_path + target.file) as bytes_stream:
+    with open(target.dir_path + target.file, encoding="utf-8") as bytes_stream:
         source = bytes_stream.read()
 
     extracted = ast.get_source_segment(source, target.node)
