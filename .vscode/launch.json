@@ -1,0 +1,27 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Drypy - Brute force",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/drypy.py",
+            "args": [
+                "./tests/reporte_pedidos/"
+            ],
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Drypy - Target",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/drypy.py",
+            "args": [
+                "./tests/reporte_pedidos/",
+                "--target",
+                "./tests/reporte_pedidos/productos.py:calcular_descuento"
+            ],
+            "console": "integratedTerminal"
+        }
+    ]
+}
