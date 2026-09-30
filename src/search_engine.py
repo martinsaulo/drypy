@@ -2,6 +2,8 @@ import os
 from itertools import combinations
 from bisect import insort
 from src.extractor import extract_functions, extract_target
+from src.comparator import compare_ast
+
 
 def search_matches(root_path, target, top):
 
@@ -49,5 +51,7 @@ def search_matches(root_path, target, top):
 
 
 def compare_functions(func1, func2):
-    # TODO: check if func1 and func2 are exacly the same function (same file and same signature)
-    return 1
+    if func1 == func2: # Avoid compare the target to itself
+        return -1
+
+    return compare_ast(func1.sub_tree, func2.sub_tree)

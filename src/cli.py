@@ -99,7 +99,17 @@ def create_parser():
             "Usar -vv para mostrar las primeras 50 líneas y -vvv para mostrar la función completa."
         )
     )
+    parser.add_argument(
+        "-th", "--threshold",
+        type=float,
+        default=50.0,
+        help=(
+            "Umbral de tolerancia [0, 100]. "
+            "Únicamente se mostrarán las funciones que superen el umbral (por defecto: 50)"
+        )
+
+    )
     parser.add_argument("-vv", action="store_true", help=argparse.SUPPRESS)
-    parser.add_argument("-vvv", action="store_true", help=argparse.SUPPRESS)
+    parser.add_argument("-vvv", action="store_true", help=argparse.SUPPRESS)    
 
     return parser

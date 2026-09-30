@@ -1,18 +1,24 @@
 import ast
+import copy
 from src.normalizer import normalize
 from src.colors import CYAN, END
 
 
 class FunctionDefinition:
     def __init__(self, function, file, dir_path):
+        self.original_name = function.name
         self.node = function
-        self.sub_tree = normalize(function.body)
+        self.sub_tree = normalize(copy.deepcopy(function))
         self.file = file
         self.dir_path = dir_path
 
 
     def __str__(self):
         return f"{self.dir_path}{self.file}{CYAN}:{self.node.name}({self.file}:{self.node.lineno}){END}"
+
+
+    def __eq__(self, value):
+        return self.dir_path == value.dir_path and self.file == self.file and self.original_name == value.original_name
 
 
 
@@ -31,7 +37,10 @@ def extract_target(target):
     with open(path, encoding="utf-8") as bytes_stream:
         node = ast.parse(bytes_stream.read())
 
-    return next(filter(lambda x: x.name == function, node.body))
+    n = next(filter(lambda x: x.name == function, node.body))
+    file = path.split("/")[-1]
+    dir_path = path.removesuffix(file)
+    return FunctionDefinition(n, file, dir_path)
 
 
 
