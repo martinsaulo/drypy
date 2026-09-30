@@ -1,10 +1,11 @@
 import ast
 import builtins
+from enum import Enum
 
 
 BUILTIN_NAMES = frozenset(dir(builtins))
 
-def should_preserve_name(name):
+def should_preserve_name(name: str) -> bool:
     return name in BUILTIN_NAMES
 
 
@@ -18,7 +19,7 @@ LITERALS = {
     Ellipsis:  "ELLIPSIS",
 }
 
-class Symbols:
+class Symbol(Enum):
     VARIABLE   = "VAR"
     ARGUMENT   = "ARG"
     ATTRIBUTE  = "ATTR"
@@ -27,29 +28,27 @@ class Symbols:
 
 
 class Normalizer(ast.NodeTransformer):
-    def __init__(self, function_name):
+    def __init__(self, function_name: str):
         super().__init__()
         
         self.function_name = function_name
 
         self.name_bindings = {
-            Symbols.VARIABLE: {},
-            Symbols.ARGUMENT: {},
-            Symbols.ATTRIBUTE: {},
+            Symbol.VARIABLE: {},
+            Symbol.ARGUMENT: {},
         }
 
         self.symbols_count = {
-            Symbols.VARIABLE: 0,
-            Symbols.ARGUMENT: 0,
-            Symbols.ATTRIBUTE: 0,
+            Symbol.VARIABLE: 0,
+            Symbol.ARGUMENT: 0,
         }
 
 
-    def get_or_add(self, name, symbol_type):
+    def get_or_add(self, name: str, symbol_type: Symbol) -> str:
         if name in self.name_bindings[symbol_type]:
             return self.name_bindings[symbol_type][name]
 
-        new_binding = symbol_type + str(self.symbols_count[symbol_type])
+        new_binding = symbol_type.value + str(self.symbols_count[symbol_type])
         self.name_bindings[symbol_type][name] = new_binding
         self.symbols_count[symbol_type] += 1
 
@@ -58,27 +57,27 @@ class Normalizer(ast.NodeTransformer):
 
     def visit_Constant(self, node):
         if node.value != None:            
-            node.value = LITERALS.get(type(node.value), Symbols.UNKNOWN)
+            node.value = LITERALS.get(type(node.value), Symbol.UNKNOWN.value)
         return node
 
 
     def visit_Name(self, node):
         if node.id == self.function_name:
-            node.id = Symbols.FUNCTION
+            node.id = Symbol.FUNCTION.value
             return node
 
-        if node.id in self.name_bindings[Symbols.ARGUMENT]:
-            node.id = self.name_bindings[Symbols.ARGUMENT][node.id]
+        if node.id in self.name_bindings[Symbol.ARGUMENT]:
+            node.id = self.name_bindings[Symbol.ARGUMENT][node.id]
             return node
 
         if not should_preserve_name(node.id):
-            node.id = self.get_or_add(node.id, Symbols.VARIABLE)
+            node.id = self.get_or_add(node.id, Symbol.VARIABLE)
 
         return node
 
 
     def visit_arg(self, node):
-        node.arg = self.get_or_add(node.arg, Symbols.ARGUMENT)
+        node.arg = self.get_or_add(node.arg, Symbol.ARGUMENT)
         return node
 
 
@@ -88,10 +87,9 @@ class Normalizer(ast.NodeTransformer):
 
 
 
-def normalize(tree):
-    if not isinstance(tree, ast.AsyncFunctionDef) and not isinstance(tree, ast.FunctionDef):
-        raise ValueError(type(tree))
-
+def normalize(
+        tree: ast.FunctionDef | ast.AsyncFunctionDef
+    ) -> ast.FunctionDef | ast.AsyncFunctionDef:
     Normalizer(tree.name).visit(tree)
-    tree.name = Symbols.FUNCTION
+    tree.name = Symbol.FUNCTION.value
     return tree

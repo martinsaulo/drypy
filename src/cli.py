@@ -44,14 +44,14 @@ def run_cli():
     
 
 
-def dir_path(string):
+def dir_path(string: str) -> str:
     if os.path.isdir(string):
         return string
     else:
         raise NotADirectoryError(string)
 
 
-def func_ref(string):
+def func_ref(string: str) -> str:
     parts = string.split(":")
 
 
@@ -64,7 +64,7 @@ def func_ref(string):
         raise FileNotFoundError(parts[0])
 
 
-def create_parser():
+def create_parser() -> argparse.ArgumentParser: 
     parser = argparse.ArgumentParser(
         prog="drypy", 
         description="Motor de busqueda de código Python repetitivo."

@@ -6,7 +6,7 @@ from src.colors import BLUE, CYAN, END
 SEPARATOR = f"{CYAN}-------------------------------------{END}"
 
 
-def function_to_json(func: ast.FunctionDef):
+def function_to_json(func: ast.FunctionDef | ast.AsyncFunctionDef) -> str:
     return json.dumps(ast_to_dict(func), indent=2, ensure_ascii=False)
 
 
@@ -26,13 +26,13 @@ def ast_to_dict(node):
     return node
 
 
-def print_ast(func: ast.FunctionDef):
+def print_ast(func: ast.FunctionDef | ast.AsyncFunctionDef):
     print(SEPARATOR)
     print(f"{BLUE}Abstract Syntax Tree:{END}")
     print(function_to_json(func))
 
 
-def print_code_from_ast(func: ast.FunctionDef):
+def print_code_from_ast(func: ast.FunctionDef | ast.AsyncFunctionDef):
     print(SEPARATOR)
     print(f"{BLUE}Generated Code:{END}")
     print(ast.unparse(func))

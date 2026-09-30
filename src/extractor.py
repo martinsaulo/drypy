@@ -5,7 +5,12 @@ from src.colors import CYAN, END
 
 
 class FunctionDefinition:
-    def __init__(self, function, file, dir_path):
+    def __init__(
+            self, 
+            function: ast.FunctionDef | ast.AsyncFunctionDef, 
+            file: str, 
+            dir_path: str
+        ):
         self.original_name = function.name
         self.node = function
         self.sub_tree = normalize(copy.deepcopy(function))
@@ -22,7 +27,7 @@ class FunctionDefinition:
 
 
 
-def extract_functions(file, dir_path):
+def extract_functions(file: str, dir_path: str) -> list[FunctionDefinition]:
     with open(dir_path + file, encoding="utf-8") as bytes_stream:
         node = ast.parse(bytes_stream.read())
 
@@ -32,7 +37,7 @@ def extract_functions(file, dir_path):
 
 
 
-def extract_target(target):
+def extract_target(target: str) -> FunctionDefinition:
     path, function = target.split(":")
     with open(path, encoding="utf-8") as bytes_stream:
         node = ast.parse(bytes_stream.read())
@@ -44,7 +49,7 @@ def extract_target(target):
 
 
 
-def extract_source(target, max_lines = None):
+def extract_source(target: FunctionDefinition, max_lines: int = None) -> str:
     with open(target.dir_path + target.file, encoding="utf-8") as bytes_stream:
         source = bytes_stream.read()
 
