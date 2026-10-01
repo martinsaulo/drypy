@@ -22,7 +22,6 @@ LITERALS = {
 class Symbol(Enum):
     VARIABLE   = "VAR"
     ARGUMENT   = "ARG"
-    ATTRIBUTE  = "ATTR"
     FUNCTION   = "FUNCTION_NAME"
     UNKNOWN    = "UNKN"
 

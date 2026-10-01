@@ -1,19 +1,24 @@
 import os
 from itertools import combinations
-from bisect import insort
 from src.extractor import extract_functions, extract_target, FunctionDefinition
 from src.comparator import compare_ast
 
 
-def search_matches(root_path: str, target: str, top: int) -> list[FunctionDefinition]:
+def search_matches(root_path: str, target: str, top: int, threshold: float) -> list[FunctionDefinition]:
 
     top_matches = []
 
     def append_in_order(func1: FunctionDefinition, func2: FunctionDefinition):
-        insort(top_matches, func1, key=lambda _: compare_functions(func1, func2))
-
-        if len(top_matches) > top:
-            top_matches.pop()
+        similarity_level = compare_functions(func1, func2)
+        if similarity_level < threshold / 100:
+            return
+        
+        top_matches.append(func1)
+        top_matches.sort(
+            key=lambda function: compare_functions(function, func2),
+            reverse=True,
+        )
+        del top_matches[top:]
 
 
     def brute_force_search(files: list[str], dir_path: str):

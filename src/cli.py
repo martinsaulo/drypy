@@ -1,7 +1,9 @@
 import argparse, os
 from src.search_engine import search_matches
-from src.extractor import extract_source
+from src.extractor import extract_source, extract_target
 from src.colors import GREEN, BLUE, RED, END
+from src.util import SEPARATOR
+from src.search_engine import compare_functions
 
 
 def run_cli():
@@ -14,7 +16,7 @@ def run_cli():
         print(f"{BLUE}[*] Funcion: {args.target.split(":")[1]}{END}")
 
     try:
-        matches = search_matches(args.project, args.target, args.number)
+        matches = search_matches(args.project, args.target, args.number, args.threshold)
     except StopIteration:
         path, target = args.target.split(":")
         print(f"{RED}No existe ninguna función {target} en el archivo {path}{END}")
@@ -24,24 +26,40 @@ def run_cli():
         print(f"{GREEN}No se encontró código repetitivo.{END}")
         return
 
+    if has_verbose_level(args) and args.target:
+        target_function = extract_target(args.target)
+        print(SEPARATOR)
+        print(extract_source(target_function, get_verbose_level(args)))
+        print(SEPARATOR + "\n")
 
     print(f"{GREEN}Top {len(matches)} similitudes:{END}")
 
     for function in matches:
         print(function)
 
-        if args.verbose:
-            max_lines = 15
-        if args.vv:
-            max_lines = 50
-        if args.vvv:
-            max_lines = None
+        if args.target:
+            target_function = extract_target(args.target)
+            diff = compare_functions(function, target_function)
+            print(f"{BLUE}Nivel de similitud:{END} {round(diff, 2)}")
 
-        if args.verbose or args.vv or args.vvv:
-            print(extract_source(function, max_lines))
-            print("------------------------------------------")
+        if has_verbose_level(args):
+            print(SEPARATOR)
+            print(extract_source(function, get_verbose_level(args)))
+            print(SEPARATOR)
 
     
+
+def has_verbose_level(args: argparse.Namespace):
+    return args.target and args.verbose or args.vv or args.vvv
+
+
+def get_verbose_level(args: argparse.Namespace):
+    if args.verbose:
+        return 15
+    if args.vv:
+        return  50
+    
+    return None
 
 
 def dir_path(string: str) -> str:
@@ -107,7 +125,15 @@ def create_parser() -> argparse.ArgumentParser:
             "Umbral de tolerancia [0, 100]. "
             "Únicamente se mostrarán las funciones que superen el umbral (por defecto: 50)"
         )
-
+    )
+    parser.add_argument(
+        "-m", "--mode",
+        type=str,
+        default="LD",
+        help=(
+            "Método de comparación. "
+            "Opciones: [SQ = Sequence Matcher, LD = Levenshtein Distance (requiere rapidfuzz), TED = Tree Edit Distance] (por defecto: SQ)"
+        )
     )
     parser.add_argument("-vv", action="store_true", help=argparse.SUPPRESS)
     parser.add_argument("-vvv", action="store_true", help=argparse.SUPPRESS)    
