@@ -10,7 +10,7 @@ def search_matches(root_path: str, target: str, top: int, threshold: float, meth
 
     def append_in_order(func1: FunctionDefinition, func2: FunctionDefinition):
         similarity_level = compare_functions(func1, func2, method)
-        if similarity_level < threshold / 100:
+        if similarity_level < threshold:
             return
         
         top_matches.append(func1)
