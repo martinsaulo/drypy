@@ -16,7 +16,7 @@ def run_cli():
         print(f"{BLUE}[*] Funcion: {args.target.split(":")[1]}{END}")
 
     try:
-        matches = search_matches(args.project, args.target, args.number, args.threshold)
+        matches = search_matches(args.project, args.target, args.number, args.threshold, args.method)
     except StopIteration:
         path, target = args.target.split(":")
         print(f"{RED}No existe ninguna función {target} en el archivo {path}{END}")
@@ -39,7 +39,7 @@ def run_cli():
 
         if args.target:
             target_function = extract_target(args.target)
-            diff = compare_functions(function, target_function)
+            diff = compare_functions(function, target_function, args.method)
             print(f"{BLUE}Nivel de similitud:{END} {round(diff, 2)}")
 
         if has_verbose_level(args):
@@ -80,6 +80,13 @@ def func_ref(string: str) -> str:
         return string
     else:
         raise FileNotFoundError(parts[0])
+
+
+def method_ref(string: str) -> str:
+    if string in ["SQ", "LD", "TED"]:
+        return string
+    else:
+        raise ValueError(string)
 
 
 def create_parser() -> argparse.ArgumentParser: 
@@ -127,9 +134,9 @@ def create_parser() -> argparse.ArgumentParser:
         )
     )
     parser.add_argument(
-        "-m", "--mode",
-        type=str,
-        default="LD",
+        "-m", "--method",
+        type=method_ref,
+        default="SQ",
         help=(
             "Método de comparación. "
             "Opciones: [SQ = Sequence Matcher, LD = Levenshtein Distance (requiere rapidfuzz), TED = Tree Edit Distance] (por defecto: SQ)"

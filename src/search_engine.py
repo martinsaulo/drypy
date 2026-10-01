@@ -4,18 +4,18 @@ from src.extractor import extract_functions, extract_target, FunctionDefinition
 from src.comparator import compare_ast
 
 
-def search_matches(root_path: str, target: str, top: int, threshold: float) -> list[FunctionDefinition]:
+def search_matches(root_path: str, target: str, top: int, threshold: float, method: str) -> list[FunctionDefinition]:
 
     top_matches = []
 
     def append_in_order(func1: FunctionDefinition, func2: FunctionDefinition):
-        similarity_level = compare_functions(func1, func2)
+        similarity_level = compare_functions(func1, func2, method)
         if similarity_level < threshold / 100:
             return
         
         top_matches.append(func1)
         top_matches.sort(
-            key=lambda function: compare_functions(function, func2),
+            key=lambda function: compare_functions(function, func2, method),
             reverse=True,
         )
         del top_matches[top:]
@@ -55,8 +55,8 @@ def search_matches(root_path: str, target: str, top: int, threshold: float) -> l
 
 
 
-def compare_functions(func1: FunctionDefinition, func2: FunctionDefinition) -> float:
+def compare_functions(func1: FunctionDefinition, func2: FunctionDefinition, method: str) -> float:
     if func1 == func2: # Avoid compare the target to itself
         return -1
 
-    return compare_ast(func1.sub_tree, func2.sub_tree)
+    return compare_ast(func1.sub_tree, func2.sub_tree, method)
