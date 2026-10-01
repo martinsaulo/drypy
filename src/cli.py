@@ -154,7 +154,7 @@ def create_parser() -> argparse.ArgumentParser:
         default="SQ",
         help=(
             "Método de comparación. "
-            "Opciones: [SQ = Sequence Matcher, LD = Levenshtein Distance (requiere rapidfuzz), TED = Tree Edit Distance] (por defecto: SQ)"
+            "Opciones: [SQ = Sequence Matcher, LD = Levenshtein Distance, TED = Tree Edit Distance] (por defecto: SQ)"
         )
     )
     parser.add_argument("-vv", action="store_true", help=argparse.SUPPRESS)
