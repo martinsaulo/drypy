@@ -32,19 +32,33 @@ def run_cli():
         print(extract_source(target_function, get_verbose_level(args)))
         print(SEPARATOR + "\n")
 
-    print(f"{GREEN}Top {len(matches)} similitudes:{END}")
-
-    for function in matches:
-        print(function)
-
-        if args.target:
+    # Target search
+    if args.target:
+        print(f"{GREEN}Top {len(matches)} similitudes:{END}")
+        for function in matches:
+            print(function)
             target_function = extract_target(args.target)
             diff = compare_functions(function, target_function, args.method)
             print(f"{BLUE}Nivel de similitud:{END} {round(diff, 2)}")
 
+            if has_verbose_level(args):
+                print(SEPARATOR)
+                print(extract_source(function, get_verbose_level(args)))
+                print(SEPARATOR)
+        return
+
+    # Pairs search
+    print(f"{GREEN}Top {len(matches)} pares de similitudes:{END}")
+    for first, second, similarity in matches:
+        print(first)
+        print(second)
+        print(f"{BLUE}Nivel de similitud:{END} {round(similarity, 2)}")
+
         if has_verbose_level(args):
             print(SEPARATOR)
-            print(extract_source(function, get_verbose_level(args)))
+            print(extract_source(first, get_verbose_level(args)))
+            print(SEPARATOR)
+            print(extract_source(second, get_verbose_level(args)))
             print(SEPARATOR)
 
     
@@ -110,10 +124,11 @@ def create_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "-n", 
         "--number", 
+        type=int,
         default=5,
         help=(
-            "Cantidad de resultados a mostrar. "
-            "Se devolverán las N funciones más similares (por defecto: 5)."
+            "Cantidad máxima de resultados a mostrar. En búsquedas sin objetivo "
+            "representa la cantidad máxima de pares (por defecto: 5)."
         )
     )
     parser.add_argument(
