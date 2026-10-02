@@ -3,7 +3,25 @@ from difflib import SequenceMatcher
 
 
 def ast_to_str(node: ast.AST) -> str:
-    return ast.dump(node, annotate_fields=False, include_attributes=False)
+    tokens = []
+
+    def visit(current: ast.AST) -> None:
+        tokens.append(type(current).__name__)
+
+        for _, value in ast.iter_fields(current):
+            if isinstance(value, ast.AST):
+                visit(value)
+            elif isinstance(value, list):
+                for item in value:
+                    if isinstance(item, ast.AST):
+                        visit(item)
+                    elif item is not None:
+                        tokens.append(str(item))
+            elif value is not None:
+                tokens.append(str(value))
+
+    visit(node)
+    return " ".join(tokens)
 
 
 def compare_ast(
