@@ -17,7 +17,8 @@ def search_matches(
         # Filter cache folders
         dirs[:] = [d for d in dirs if d != "__pycache__"]
         for file in files:
-            functions.extend(extract_functions(file, root))
+            if file.endswith(".py"):
+                functions.extend(extract_functions(file, root))
 
     # Target search
     if target:
